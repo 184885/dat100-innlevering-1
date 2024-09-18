@@ -12,55 +12,73 @@ public class O2 {
 	 * Ingen (0 - 208 050), trinn 1 (208 051 - 292 850)(1,7 % skatt), trinn 2 (292 851 - 670 000)(4,0 % skatt), 
 	 * trinn 3 (670 001 – 937 900)(13,6 % skatt), trinn 4 (937 901 – 1 350 000)(16,6 % skatt) 
 	 * og trinn 5 (frå og med 1 350 001)(17,6 % skatt). 
-	 * Skattebeløpet samt skatteprosent blir oppgitt i konsollen, saman med innverdien.
+	 * Skattebeløpet samt trinn blir oppgitt i konsollen, saman med innverdien.
 	 */
 	public static void main(String[] args) {
-		int inntekt, skatt=0 ; //initierer verdiar som brukas seinare
-		int t0 = 208050, t1 = 292850, t2 = 670000, t3 = 937900, t4 = 1350000; // sluttverdier trinnskatt
-		double tp1 = 0.017, tp2 = 0.04, tp3 = 0.136, tp4 = 0.166, tp5 = 0.176; // prosentsatser
-		
-		
-			String inntxt = showInputDialog("Bruttoinntekt: "); //input frå brukar
-			inntekt = Integer.parseInt(inntxt); //omgjøring til heiltal
-			String trinn = "Feil"; //Initierer verdi (bruker feil for feilsøking)
-		/*Her sjekkes verdien for inntekt mot dei ulike skattetrinna, 
-		 * og definerer uttekst etter kva trinn ein havner på
-		 */
-		if (inntekt >= 0 && inntekt <= t0) { // Ingen trinnskatt
+		int inntekt, skatt = 0; // initierer verdiar som brukas seinare
+		String inntxt = showInputDialog("Bruttoinntekt: \n(i heiltall)"); // input frå brukar
+		inntekt = Integer.parseInt(inntxt); // omgjøring til heiltal
+		String trinn = "Feil";
+
+		if (inntekt >= 0 && inntekt < t[0]) { //dersom input ikkje skal ha trinnskatt
 			skatt = 0;
 			trinn = "ingen";
-		} else if (inntekt > t0 && inntekt <= t1) { // Trinn 1
-			skatt = skattrekning(inntekt, tp1);
-			trinn = ("1,7 %");
-		} else if (inntekt > t1 && inntekt <= t2) { // Trinn 2
-			skatt = skattrekning(inntekt, tp2);
-			trinn = ("4,0 %");
-		} else if (inntekt > t2 && inntekt <= t3) { // Trinn 3
-			skatt = skattrekning(inntekt, tp3);
-			trinn = ("13,6 %");
-		} else if (inntekt > t3 && inntekt <= t4) { // Trinn 4
-			skatt = skattrekning(inntekt, tp4);
-			trinn = ("16,6 %");
-		} else if (inntekt > t4) { // Trinn 5
-			skatt = skattrekning(inntekt, tp5);
-			trinn = ("17,6 %");
+		} else if (inntekt >= t[0] && inntekt < t[1]) { //Ved trinn 1
+			skatt = trinnskatt(inntekt - t[0], tp[0]);
+			trinn = "Trinn 1";
+		} else if (inntekt >= t[1] && inntekt < t[2]) { //Ved trinn 2
+			skatt = t1() + trinnskatt(inntekt - t[1], tp[1]);
+			trinn = "Trinn 2";
+		} else if (inntekt >= t[2] && inntekt < t[3]) { // Ved trinn 3
+			skatt = t1() + t2() + trinnskatt(inntekt - t[2], tp[2]);
+			trinn = "Trinn 3";
+		} else if (inntekt >= t[3] && inntekt < t[4]) { //Ved trinn 4
+			skatt = t1() + t2() + t3() + trinnskatt(inntekt - t[3], tp[3]);
+			trinn = "Trinn 4";
+		} else if (inntekt >= t[4]) { //Ved trinn 5
+			skatt = t1() + t2() + t3() + t4() + trinnskatt(inntekt - t[4], tp[4]);
+			trinn = "Trinn 5";
 		}
-
-		System.out.println("Sidan du har " + inntekt + " kr i bruttoinntekt, skal du betale " + trinn + " skatt.");
-		System.out.println("Du skal betale " + skatt + " kr i trinnskatt.\n*Rundet til nærmeste heiltal");
-		
-		
-	}
-	//oppretter ein eigen metode for sjølve utrekninga (dette var ikkje nødvendig, men lettare å feilsøke)
-	private static int skattrekning(int inntekt, double prosent) {
-		int skatt;
-		double s;
-		s = inntekt * prosent;
-		skatt = round((float) s); 
-		/*Såg på BigDecimal for å prøve å begrense til to desimaler, men fann ut det blei litt komplisert.
-		*Endte derfor opp med å avrunde tallet til nærmaste heiltal*/
-		return skatt;
-
+		skatt = skatt / 1000; //omgjør tall til heltall 
+		if (skatt == 0) { //Spesiell tekst for ingen skatt
+			System.out.println("Sidan du har " + inntekt
+					+ " kr i bruttoinntekt, har du ingen trinnskatt. \nDu skal derfor ikkje betale noko i skatt.");
+		}else if(trinn.equals("Feil")){ //Dersom det er blitt oppgitt eit negativt tal
+			System.out.println("Det har oppstått ein feil");
+		}
+		else {//tekst som oppgir inntekt, trinn, og trinnskatt
+			System.out.println("Sidan du har " + inntekt + " kr i bruttoinntekt, havner du på " + trinn + ".");
+			System.out.println("Du skal betale " + skatt + " kr* i trinnskatt.\n*Desimaler er fjernet");
+		}
 	}
 
+	private static int trinnskatt(int iot, int prosent) { //Rekning av prosentsats (svar avgitt som int der dei tre siste siffer egentleg er desimaltal)
+		int s = iot * prosent;
+		return s;
+	}
+
+	private static int[] t = { 208051, 292851, 670001, 937901, 1350001 // sluttverdier trinnskatt
+	};
+	private static int[] tp = { 17, 40, 136, 166, 176 // prosentsatser
+	};
+
+	private static int t1() {
+		int s = trinnskatt(t[1] - t[0], tp[0]); //totalsats for trinn 1
+		return s;
+	}
+
+	private static int t2() {
+		int s = trinnskatt(t[2] - t[1], tp[1]); //totalsats for trinn 2
+		return s;
+	}
+
+	private static int t3() {
+		int s = trinnskatt(t[3] - t[2], tp[2]); //totalsats for trinn 3
+		return s;
+	}
+
+	private static int t4() {
+		int s = trinnskatt(t[4] - t[3], tp[3]); //totalsats for trinn 4
+		return s;
+	}
 }
